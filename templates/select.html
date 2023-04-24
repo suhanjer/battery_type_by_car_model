@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Select car battery
+{% endblock %}
+
+{% block main %}
+
+  <form action='/select', method = "post">
+    <div>
+      <select name = "model" id = "model">
+        <option value = "" disabled selected>Model</option>
+        {% for row in models %}
+          <option value = "{{ row }}">{{ row }}</option>
+        {% endfor %}
+      </select>
+      <select name = "model_line" id = "model_line">
+        <option value = "" disabled selected>Model Line</option>
+      </select>
+      <select name = "model_type" id = "model_type">
+        <option value = "" disabled selected>Model Type</option>
+      </select>
+      <input type = "date" name = "date" id = "date">
+    </div>
+  </form>
+  <div>
+    <ul id = "battery"></ul>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script>
+    let model = document.querySelector('#model');
+    model.onchange = function()
+    {
+      $.get('/model_line?model=' + model.value, function(data)
+      {
+        let line = "";
+        for (row of data)
+        {
+          line += '<option value = "' + row + '">' + row + '</option>';
+        }
+        document.querySelector('#model_line').innerHTML = '<option value = "" disabled selected>Model Line</option>';
+        document.querySelector('#model_line').innerHTML += line;
+      })
+    }
+  </script>
+
+  <script>
+    let model_line = document.querySelector('#model_line');
+    model_line.onchange = function()
+    {
+      $.get('/model_type?model_line=' + model.value + '>|<' + model_line.value, function(data)
+      {
+        let type = "";
+        for (row of data)
+        {
+          type += '<option value = "' + row + '">' + row + '</option>';
+        }
+        document.querySelector('#model_type').innerHTML = '<option value = "" disabled selected>Model Type</option>';
+        document.querySelector('#model_type').innerHTML += type;
+      })
+    }
+  </script>
+
+  <script>
+    let model_type = document.querySelector('#model_type');
+    model_type.onchange = function()
+    {
+      $.get('/date?model_type=' + model.value + '>|<' + model_line.value + '>|<' + model_type.value, function(data)
+      {
+        f = data[0];
+        t = data[1];
+        document.querySelector('#date').min = f;
+        document.querySelector('#date').max = t;
+      })
+    }
+  </script>
+
+  <script>
+    let date = document.querySelector('#date');
+    date.onchange = function()
+    {
+      $.get('/battery?date=' + model.value + '>|<' + model_line.value + '>|<' + model_type.value + '>|<' + date.value, function(data)
+      {
+        let battery = "";
+        for (row of data)
+        {
+          battery += '<li>' + row + '</li>'
+        }
+        document.querySelector('#battery').innerHTML = "";
+        document.querySelector('#battery').innerHTML += battery;
+      })
+    }
+  </script>
+
+
+{% endblock %}
